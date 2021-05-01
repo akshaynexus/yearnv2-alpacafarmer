@@ -148,7 +148,7 @@ contract Strategy is BaseStrategy {
 
     function estimatedTotalAssets() public view override returns (uint256) {
         //Add the vault tokens + staked tokens from 1inch governance contract
-        return balanceOfWant().add(balanceOfStake());
+        return balanceOfWant().add(balanceOfRelativeStaked());
     }
 
     function _depositWithBNB(uint256 amount) internal {
