@@ -1,12 +1,14 @@
 import pytest
 from brownie import Wei, accounts, chain
+import conftest as config
 
 # reference code taken from yHegic repo and stecrv strat
 # https://github.com/Macarse/yhegic
 # https://github.com/Grandthrax/yearnv2_steth_crv_strat
 
 
-@pytest.mark.require_network("mainnet-fork")
+@pytest.mark.parametrize(config.fixtures, config.params, indirect=True)
+@pytest.mark.require_network("bsc-main-fork")
 def test_operation(
     currency,
     strategy,
@@ -21,11 +23,11 @@ def test_operation(
     interface,
 ):
     # Amount configs
-    test_budget = Wei("888000 ether")
-    approve_amount = Wei("1000000 ether")
-    deposit_limit = Wei("889000 ether")
-    bob_deposit = Wei("100000 ether")
-    alice_deposit = Wei("788000 ether")
+    test_budget = Wei("888 ether")
+    approve_amount = Wei("1000 ether")
+    deposit_limit = Wei("889 ether")
+    bob_deposit = Wei("100 ether")
+    alice_deposit = Wei("788 ether")
     currency.approve(whale, approve_amount, {"from": whale})
     currency.transferFrom(whale, gov, test_budget, {"from": whale})
 
@@ -71,6 +73,6 @@ def sleepAndHarvest(times, strat, gov):
 def debugStratData(strategy, msg):
     print(msg)
     print("Total assets " + str(strategy.estimatedTotalAssets()))
-    print("1INCH Balance " + str(strategy.balanceOfWant()))
+    print("Asset Balance " + str(strategy.balanceOfWant()))
     print("Stake balance " + str(strategy.balanceOfStake()))
     print("Pending reward " + str(strategy.pendingReward()))

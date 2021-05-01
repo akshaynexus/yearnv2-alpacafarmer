@@ -1,11 +1,23 @@
 import pytest
 
 from brownie import Wei, chain
+import conftest as config
 
 
-@pytest.mark.require_network("mainnet-fork")
+@pytest.mark.parametrize(config.fixtures, config.params, indirect=True)
+@pytest.mark.require_network("bsc-main-fork")
 def test_migrate(
-    currency, Strategy, strategy, chain, vault, whale, gov, strategist, interface
+    currency,
+    Strategy,
+    strategy,
+    chain,
+    vault,
+    whale,
+    interestToken,
+    pid,
+    gov,
+    strategist,
+    interface,
 ):
     debt_ratio = 10_000
     vault.addStrategy(strategy, debt_ratio, 0, 2 ** 256 - 1, 1_000, {"from": gov})
@@ -21,7 +33,9 @@ def test_migrate(
     totalasset_beforemig = strategy.estimatedTotalAssets()
     assert totalasset_beforemig > 0
 
-    strategy2 = strategist.deploy(Strategy, vault)
+    strategy2 = strategist.deploy(Strategy, vault, interestToken, pid)
     vault.migrateStrategy(strategy, strategy2, {"from": gov})
+    strategy2.harvest({"from": strategist})
+
     # Check that we got all the funds on migration
-    assert strategy2.estimatedTotalAssets() == totalasset_beforemig
+    assert strategy2.estimatedTotalAssets() >= totalasset_beforemig
